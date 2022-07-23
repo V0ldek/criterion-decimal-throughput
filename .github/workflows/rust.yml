@@ -1,0 +1,158 @@
+# cspell:disable
+name: Rust
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  test:
+    name: Test matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - nightly
+        os: 
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Rustup ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+          default: true
+      - name: Cache restore
+        id: cache-restore
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ matrix.os }}-${{ matrix.rust }}-${{ matrix.target_feature }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - name: Install cargo-hack
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-hack
+        env:
+          CARGO_TARGET_DIR: target/
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+        env:
+          RUSTFLAGS: "--deny warnings"
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+        env:
+          RUSTFLAGS: "--deny warnings"
+
+  clippy:
+    permissions:
+      checks: write
+    name: Clippy (stable)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Rustup stable toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        components: clippy
+        override: true
+        default: true
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+      env:
+        RUSTFLAGS: "--deny warnings"
+    - name: Clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- --deny warnings
+
+  clippy-nightly:
+    permissions:
+      checks: write
+    name: Clippy (nightly)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Rustup nightly toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        components: clippy
+        override: true
+        default: true
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+      env:
+        RUSTFLAGS: "--deny warnings"
+    - name: Clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: -- --deny warnings
+      
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Rustup nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          default: true
+      - name: cargo doc
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --no-deps
+        env:
+          RUSTDOCFLAGS: "-Dwarnings --cfg docsrs"
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Rustup stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+          override: true
+          default: true
+      - name: Format
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
