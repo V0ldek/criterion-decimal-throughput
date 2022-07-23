@@ -150,18 +150,18 @@ impl ValueFormatter for DecimalByteMeasurement {
         use Throughput::*;
         use Unit::*;
 
-        let (value, unit) = match *throughput {
+        let (total_units, unit) = match *throughput {
             Bytes(bytes) => (bytes as f64, Byte),
             Elements(elements) => (elements as f64, Elem),
         };
-        let per_second = value * (1e9 / typical_value);
-        let multiple = if per_second >= 1e12 {
+        let units_per_second = total_units * (1e9 / typical_value);
+        let multiple = if units_per_second >= 1e12 {
             Tera
-        } else if per_second >= 1e9 {
+        } else if units_per_second >= 1e9 {
             Giga
-        } else if per_second >= 1e6 {
+        } else if units_per_second >= 1e6 {
             Mega
-        } else if per_second >= 1e3 {
+        } else if units_per_second >= 1e3 {
             Kilo
         } else {
             One
@@ -169,8 +169,8 @@ impl ValueFormatter for DecimalByteMeasurement {
         let denominator = multiple.denominator();
 
         for val in values {
-            let per_second = value * (1e9 / *val);
-            *val = per_second / denominator;
+            let units_per_second = total_units * (1e9 / *val);
+            *val = units_per_second / denominator;
         }
 
         match (unit, multiple) {
