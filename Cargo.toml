@@ -4,14 +4,11 @@ version = "1.0.0"
 authors = ["Mateusz Gienieczko <mat@gienieczko.com>"]
 edition = "2021"
 description = "Criterion.rs measurement for decimal throughput (MB/s, GB/s, etc.)"
-readme = "../README.md"
+readme = "README.md"
 license = "MIT"
 keywords = ["criterion", "benchmark", "measurement", "throughput", "criterion-rs"]
-exclude = ["/data"]
 categories = ["profiling"]
 repository = "https://github.com/V0ldek/criterion-decimal-throughput"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies] 
 criterion = "0.3.5"
