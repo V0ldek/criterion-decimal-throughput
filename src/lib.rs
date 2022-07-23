@@ -191,3 +191,106 @@ impl ValueFormatter for DecimalByteMeasurement {
         self.0.formatter().scale_for_machines(values)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use proptest::prelude::*;
+    use Target::*;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    enum Target {
+        One,
+        Kilo,
+        Mega,
+        Giga,
+        Tera,
+    }
+
+    impl Target {
+        fn get_base(self) -> f64 {
+            match self {
+                One => 1.0,
+                Kilo => 1e3,
+                Mega => 1e6,
+                Giga => 1e9,
+                Tera => 1e12,
+            }
+        }
+
+        fn expected_bytes(self) -> &'static str {
+            match self {
+                One => " B/s",
+                Kilo => "KB/s",
+                Mega => "MB/s",
+                Giga => "GB/s",
+                Tera => "TB/s",
+            }
+        }
+
+        fn expected_elems(self) -> &'static str {
+            match self {
+                One => " elem/s",
+                Kilo => "Kelem/s",
+                Mega => "Melem/s",
+                Giga => "Gelem/s",
+                Tera => "Telem/s",
+            }
+        }
+    }
+
+    fn arbitrary_target() -> impl Strategy<Value = Target> {
+        prop_oneof![Just(One), Just(Kilo), Just(Mega), Just(Giga), Just(Tera)]
+    }
+
+    proptest! {
+        #[test]
+        fn scale_throughputs_bytes_gives_correct_unit(target in arbitrary_target(), bytes in any::<u64>()) {
+            // bytes / seconds = target
+            // seconds = bytes / target
+            let thpt_config = Throughput::Bytes(bytes);
+            let seconds = (bytes as f64) / target.get_base();
+            let typical = (seconds * 1e9) * (1.0 - f64::EPSILON);
+
+            let measurement = DecimalByteMeasurement::default();
+            let result = measurement.scale_throughputs(typical, &thpt_config, &mut []);
+
+            assert_eq!(result, target.expected_bytes());
+        }
+
+        #[test]
+        fn scale_throughputs_elems_gives_correct_unit(target in arbitrary_target(), elems in any::<u64>()) {
+            // elems / seconds = target
+            // seconds = elems / target
+            let thpt_config = Throughput::Elements(elems);
+            let seconds = (elems as f64) / target.get_base();
+            let typical = (seconds * 1e9) * (1.0 - f64::EPSILON);
+
+            let measurement = DecimalByteMeasurement::default();
+            let result = measurement.scale_throughputs(typical, &thpt_config, &mut []);
+
+            assert_eq!(result, target.expected_elems());
+        }
+    }
+
+    #[test]
+    fn scale_throughputs_bytes() {
+        let thpt_config = Throughput::Bytes(1_000_000);
+        let typical = 1_000_000_000.0;
+        let mut values = [
+            100_000_000.0,
+            500_000_000.0,
+            999_999_999.0,
+            1_000_000_000.0,
+            1_000_000_001.0,
+            2_000_000_000.0,
+            10_000_000_000.0,
+        ];
+
+        let measurement = DecimalByteMeasurement::default();
+        let result = measurement.scale_throughputs(typical, &thpt_config, &mut values);
+
+        assert_eq!(result, "MB/s");
+        assert_eq!(values, [10.0, 2.0, 1.000000001, 1.0, 0.999999999, 0.5, 0.1]);
+    }
+}
