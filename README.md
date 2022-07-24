@@ -26,7 +26,7 @@ which is a much nicer '1.5787e9'. It is quite subjective to prefer one over the 
 ## Usage
 
 Simply use the provided `decimal_byte_measurement` function for default configuration,
-or set the `DecimalByteMeasurement` type as measurement manually. See the example on [docs.rs](https://docs.rs/criterion-decimal-throughput/latest/criterion-decimal-throughput).
+or set the `DecimalByteMeasurement` type as measurement manually. See the example on [docs.rs](https://docs.rs/criterion-decimal-throughput/1.0.0/criterion_decimal_throughput/index.html).
 
 ## Installation
 
