@@ -250,7 +250,7 @@ mod test {
             // seconds = bytes / target
             let thpt_config = Throughput::Bytes(bytes);
             let seconds = (bytes as f64) / target.get_base();
-            let typical = (seconds * 1e9) * (1.0 - f64::EPSILON);
+            let typical = (seconds * 1e9) * 0.999999;
 
             let measurement = DecimalByteMeasurement::default();
             let result = measurement.scale_throughputs(typical, &thpt_config, &mut []);
@@ -264,7 +264,7 @@ mod test {
             // seconds = elems / target
             let thpt_config = Throughput::Elements(elems);
             let seconds = (elems as f64) / target.get_base();
-            let typical = (seconds * 1e9) * (1.0 - f64::EPSILON);
+            let typical = (seconds * 1e9) * 0.999999;
 
             let measurement = DecimalByteMeasurement::default();
             let result = measurement.scale_throughputs(typical, &thpt_config, &mut []);
@@ -292,5 +292,20 @@ mod test {
 
         assert_eq!(result, "MB/s");
         assert_eq!(values, [10.0, 2.0, 1.000000001, 1.0, 0.999999999, 0.5, 0.1]);
+    }
+
+    #[test]
+    fn scale_throughputs_elems_gives_correct_unit_regression1() {
+        let elems = 13302377187617527;
+        let target = Mega;
+
+        let thpt_config = Throughput::Elements(elems);
+        let seconds = (elems as f64) / target.get_base();
+        let typical = (seconds * 1e9) * 0.999999;
+
+        let measurement = DecimalByteMeasurement::default();
+        let result = measurement.scale_throughputs(typical, &thpt_config, &mut []);
+
+        assert_eq!(result, target.expected_elems());
     }
 }

@@ -1,0 +1,2 @@
+cc 30bd97e0061eba757371f99f38e89dff10b59ad84432ab8bfc3ec9fe0cfb7f9e # shrinks to target = Mega, elems = 8480670981965614
+cc 53ab27ffdcae03a970e051d9a48c6da9069d553e12bebfd5c301b26d5ea16694 # shrinks to target = Mega, elems = 13302377187617527
