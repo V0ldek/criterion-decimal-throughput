@@ -7,11 +7,11 @@ description = "Criterion.rs measurement for decimal throughput (MB/s, GB/s, etc.
 readme = "README.md"
 license = "MIT"
 keywords = ["criterion", "benchmark", "measurement", "throughput", "criterion-rs"]
-categories = ["profiling"]
+categories = ["development-tools::profiling"]
 repository = "https://github.com/V0ldek/criterion-decimal-throughput"
 
 [dependencies] 
-criterion = "0.3.5"
+criterion = "0.3.6"
 
 [dev-dependencies]
 proptest = "1.0.0"
