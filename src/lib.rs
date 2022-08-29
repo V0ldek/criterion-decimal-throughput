@@ -12,7 +12,7 @@
 //! exposed with the [`decimal_byte_measurement`] function.
 //! 2. Enable throughput measurement in the benchmark group with [`criterion::BenchmarkGroup::throughput`].
 //!
-//! ## Example
+//! ### Example
 //!
 //! ```
 //! use criterion::{criterion_group, criterion_main};
@@ -30,6 +30,38 @@
 //! criterion_group!(
 //!     name = example;
 //!     config = decimal_byte_measurement();
+//!     targets = example_bench
+//! );
+//! criterion_main!(example);
+//! ```
+//!
+//! ### With custom config
+//!
+//! If you use a custom configuration for your benches and want to combine it with this crate, the [`decimal_byte_measurement`] will not
+//! do, as it includes the default Criterion config. Instead, register the measurement with [`criterion::Criterion::with_measurement`]:
+//!
+//! #### Example
+//!
+//! ```
+//! use core::time::Duration;
+//! use criterion::{criterion_group, criterion_main};
+//! use criterion_decimal_throughput::{Criterion, DecimalByteMeasurement};
+//!
+//! fn example_bench(c: &mut Criterion) {
+//!     // ...
+//! }
+//!
+//! // Your custom configuration would come here.
+//! // As an example, we use a configuration that sets a non-default warm-up time of 10 seconds.
+//! pub fn my_custom_config() -> Criterion {
+//!     criterion::Criterion::default()
+//!         .warm_up_time(Duration::from_secs(10))
+//!         .with_measurement(DecimalByteMeasurement::new())
+//! //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ This enables the crate.
+//! }
+//! criterion_group!(
+//!     name = example;
+//!     config = my_custom_config();
 //!     targets = example_bench
 //! );
 //! criterion_main!(example);
