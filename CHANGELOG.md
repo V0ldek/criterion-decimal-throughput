@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2022-08-29
+
+### Reliability
+
+#### Bump `criterion` to 0.3.6
+
 ## [1.0.1] - 2022-08-29
 
 ### Documentation
