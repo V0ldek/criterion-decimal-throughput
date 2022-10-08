@@ -9,6 +9,12 @@
 
 [![Crates.io](https://img.shields.io/crates/l/criterion-decimal-throughput)](https://choosealicense.com/licenses/mit/)
 
+## DEPRECATION
+
+**This crate is now obsolete as Criterion added this functionality in v0.4.0 as `Throughput::BytesDecimal`. Please migrate your Criterion version.**
+
+<hr/>
+
 Custom measurement format for Criterion.rs that displays throughput in decimal byte-multiples (KB/s, MB/s, GB/s) instead of binary (KiB/s, MiB/s, GiB/s).
 
 ## Features
